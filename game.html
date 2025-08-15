@@ -1,718 +1,2004 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اللعب - ماذا لو؟</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #000000;
-            --secondary: #1a1a1a;
-            --accent: #ffd700;
-            --text: #ffffff;
-            --correct: #4CAF50;
-            --wrong: #F44336;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Tajawal', sans-serif;
-        }
-        
-        body {
-            background-color: var(--primary);
-            background-image: 
-                radial-gradient(circle at 25% 25%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
-                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1" fill="%23ffd700" opacity="0.5"/></svg>');
-            color: var(--text);
-            min-height: 100vh;
-        }
-        
-        .container {
-            width: 90%;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem 0;
-        }
-        
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
-        }
-        
-        .back-btn {
-            background: transparent;
-            color: var(--text);
-            border: 1px solid var(--accent);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .back-btn:hover {
-            background: rgba(255, 215, 0, 0.1);
-            transform: translateX(-5px);
-        }
-        
-        .stage-info {
-            text-align: center;
-            flex-grow: 1;
-        }
-        
-        .stage-title {
-            font-size: 1.5rem;
-            color: var(--accent);
-        }
-        
-        .progress-container {
-            width: 100%;
-            background: var(--secondary);
-            height: 10px;
-            border-radius: 5px;
-            margin: 1rem 0;
-            overflow: hidden;
-        }
-        
-        .progress-bar {
-            height: 100%;
-            background: var(--accent);
-            border-radius: 5px;
-            transition: width 0.5s ease;
-        }
-        
-        .question-container {
-            background: var(--secondary);
-            padding: 2rem;
-            border-radius: 10px;
-            margin: 2rem 0;
-            border: 1px solid rgba(255, 215, 0, 0.2);
-        }
-        
-        .question-text {
-            font-size: 1.5rem;
-            margin-bottom: 2rem;
-            line-height: 1.6;
-        }
-        
-        .options-container {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1rem;
-        }
-
-        /* منع النسخ */
-* {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
-/* منع التكبير */
-html {
-    touch-action: pan-x pan-y;
-}
-
-/* منع اللون الأزرق عند الضغط */
-* {
-    -webkit-tap-highlight-color: transparent;
-}
-        
-        .option {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            border-radius: 8px;
-            padding: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-        }
-        
-        .option:hover {
-            background: rgba(255, 215, 0, 0.1);
-            border-color: var(--accent);
-        }
-        
-        .option.correct {
-            background: rgba(76, 175, 80, 0.2);
-            border-color: var(--correct);
-        }
-        
-        .option.wrong {
-            background: rgba(244, 67, 54, 0.2);
-            border-color: var(--wrong);
-        }
-        
-        .option-icon {
-            margin-left: 10px;
-            font-size: 1.2rem;
-        }
-        
-        .next-btn {
-            background: var(--accent);
-            color: var(--primary);
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            display: block;
-            margin: 2rem auto 0;
-            transition: all 0.3s ease;
-        }
-        
-        .next-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
-        }
-        
-        .next-btn.hidden {
-            display: none;
-        }
-        
-        .result-container {
-            text-align: center;
-            margin-top: 2rem;
-            padding: 2rem;
-            background: var(--secondary);
-            border-radius: 10px;
-            border: 1px solid var(--accent);
-            display: none;
-        }
-        
-        .result-title {
-            font-size: 2rem;
-            color: var(--accent);
-            margin-bottom: 1rem;
-        }
-        
-        .result-score {
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .result-message {
-            margin-bottom: 1.5rem;
-            line-height: 1.6;
-        }
-        
-        .action-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-        
-        .action-btn {
-            background: transparent;
-            color: var(--accent);
-            border: 1px solid var(--accent);
-            padding: 0.8rem 1.5rem;
-            border-radius: 50px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .action-btn:hover {
-            background: rgba(255, 215, 0, 0.1);
-        }
-        
-        .action-btn.primary {
-            background: var(--accent);
-            color: var(--primary);
-        }
-        
-        .action-btn.primary:hover {
-            background: #e6c300;
-        }
-        
-        @media (max-width: 768px) {
-            .question-text {
-                font-size: 1.3rem;
-            }
-            
-            .question-container {
-                padding: 1.5rem;
-            }
-            
-            .action-buttons {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-            
-            .action-btn {
-                width: 100%;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <button class="back-btn" id="backBtn">
-                <i class="fas fa-arrow-left"></i>
-            </button>
-            <div class="stage-info">
-                <div class="stage-title" id="stageTitle">المرحلة 1</div>
-                <div class="progress-container">
-                    <div class="progress-bar" id="progressBar"></div>
-                </div>
-            </div>
-            <div style="width: 40px;"></div>
-        </header>
-        
-        <div class="question-container">
-            <div class="question-text" id="questionText"></div>
-            <div class="options-container" id="optionsContainer"></div>
-            <button class="next-btn hidden" id="nextBtn">السؤال التالي <i class="fas fa-arrow-left"></i></button>
-        </div>
-        
-        <div class="result-container" id="resultContainer">
-            <h2 class="result-title" id="resultTitle">أحسنت!</h2>
-            <div class="result-score" id="resultScore"></div>
-            <p class="result-message" id="resultMessage"></p>
-            <div class="action-buttons">
-                <button class="action-btn primary" id="restartBtn">
-                    <i class="fas fa-redo"></i> إعادة اللعب
-                </button>
-                <button class="action-btn" id="stagesBtn">
-                    <i class="fas fa-layer-group"></i> قائمة المراحل
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // جميع الأسئلة (150 سؤال مقسمة على 15 مرحلة)
+<!DOCTYPE html>  
+<html lang="ar" dir="rtl">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>اللعب - ماذا لو؟</title>  
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">  
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal&display=swap" rel="stylesheet">  
+    <style>  
+        :root {  
+            --primary: #000000;  
+            --secondary: #1a1a1a;  
+            --accent: #ffd700;  
+            --text: #ffffff;  
+            --correct: #4CAF50;  
+            --wrong: #F44336;  
+        }  
+          
+        * {  
+            margin: 0;  
+            padding: 0;  
+            box-sizing: border-box;  
+            font-family: 'Tajawal', sans-serif;  
+        }  
+          
+        body {  
+            background-color: var(--primary);  
+            background-image:   
+                radial-gradient(circle at 25% 25%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),  
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1" fill="%23ffd700" opacity="0.5"/></svg>');  
+            color: var(--text);  
+            min-height: 100vh;  
+        }  
+          
+        .container {  
+            width: 90%;  
+            max-width: 800px;  
+            margin: 0 auto;  
+            padding: 2rem 0;  
+        }  
+          
+        header {  
+            display: flex;  
+            justify-content: space-between;  
+            align-items: center;  
+            margin-bottom: 2rem;  
+            padding-bottom: 1rem;  
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);  
+        }  
+          
+        .back-btn {  
+            background: transparent;  
+            color: var(--text);  
+            border: 1px solid var(--accent);  
+            border-radius: 50%;  
+            width: 40px;  
+            height: 40px;  
+            display: flex;  
+            align-items: center;  
+            justify-content: center;  
+            cursor: pointer;  
+            transition: all 0.3s ease;  
+        }  
+          
+        .back-btn:hover {  
+            background: rgba(255, 215, 0, 0.1);  
+            transform: translateX(-5px);  
+        }  
+          
+        .stage-info {  
+            text-align: center;  
+            flex-grow: 1;  
+        }  
+          
+        .stage-title {  
+            font-size: 1.5rem;  
+            color: var(--accent);  
+        }  
+          
+        .progress-container {  
+            width: 100%;  
+            background: var(--secondary);  
+            height: 10px;  
+            border-radius: 5px;  
+            margin: 1rem 0;  
+            overflow: hidden;  
+        }  
+          
+        .progress-bar {  
+            height: 100%;  
+            background: var(--accent);  
+            border-radius: 5px;  
+            transition: width 0.5s ease;  
+        }  
+          
+        .question-container {  
+            background: var(--secondary);  
+            padding: 2rem;  
+            border-radius: 10px;  
+            margin: 2rem 0;  
+            border: 1px solid rgba(255, 215, 0, 0.2);  
+        }  
+          
+        .question-text {  
+            font-size: 1.5rem;  
+            margin-bottom: 2rem;  
+            line-height: 1.6;  
+        }  
+          
+        .options-container {  
+            display: grid;  
+            grid-template-columns: 1fr;  
+            gap: 1rem;  
+        }  
+  
+        /* منع النسخ */  
+* {  
+    -webkit-user-select: none;  
+    -moz-user-select: none;  
+    -ms-user-select: none;  
+    user-select: none;  
+}  
+  
+/* منع التكبير */  
+html {  
+    touch-action: pan-x pan-y;  
+}  
+  
+/* منع اللون الأزرق عند الضغط */  
+* {  
+    -webkit-tap-highlight-color: transparent;  
+}  
+          
+        .option {  
+            background: rgba(255, 255, 255, 0.05);  
+            border: 1px solid rgba(255, 215, 0, 0.3);  
+            border-radius: 8px;  
+            padding: 1rem;  
+            cursor: pointer;  
+            transition: all 0.3s ease;  
+            display: flex;  
+            align-items: center;  
+        }  
+          
+        .option:hover {  
+            background: rgba(255, 215, 0, 0.1);  
+            border-color: var(--accent);  
+        }  
+          
+        .option.correct {  
+            background: rgba(76, 175, 80, 0.2);  
+            border-color: var(--correct);  
+        }  
+          
+        .option.wrong {  
+            background: rgba(244, 67, 54, 0.2);  
+            border-color: var(--wrong);  
+        }  
+          
+        .option-icon {  
+            margin-left: 10px;  
+            font-size: 1.2rem;  
+        }  
+          
+        .next-btn {  
+            background: var(--accent);  
+            color: var(--primary);  
+            border: none;  
+            padding: 1rem 2rem;  
+            border-radius: 50px;  
+            font-size: 1.1rem;  
+            font-weight: bold;  
+            cursor: pointer;  
+            display: block;  
+            margin: 2rem auto 0;  
+            transition: all 0.3s ease;  
+        }  
+          
+        .next-btn:hover {  
+            transform: translateY(-3px);  
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);  
+        }  
+          
+        .next-btn.hidden {  
+            display: none;  
+        }  
+          
+        .result-container {  
+            text-align: center;  
+            margin-top: 2rem;  
+            padding: 2rem;  
+            background: var(--secondary);  
+            border-radius: 10px;  
+            border: 1px solid var(--accent);  
+            display: none;  
+        }  
+          
+        .result-title {  
+            font-size: 2rem;  
+            color: var(--accent);  
+            margin-bottom: 1rem;  
+        }  
+          
+        .result-score {  
+            font-size: 1.5rem;  
+            margin-bottom: 1.5rem;  
+        }  
+          
+        .result-message {  
+            margin-bottom: 1.5rem;  
+            line-height: 1.6;  
+        }  
+          
+        .action-buttons {  
+            display: flex;  
+            justify-content: center;  
+            gap: 1rem;  
+            margin-top: 1.5rem;  
+        }  
+          
+        .action-btn {  
+            background: transparent;  
+            color: var(--accent);  
+            border: 1px solid var(--accent);  
+            padding: 0.8rem 1.5rem;  
+            border-radius: 50px;  
+            font-size: 1rem;  
+            cursor: pointer;  
+            transition: all 0.3s ease;  
+        }  
+          
+        .action-btn:hover {  
+            background: rgba(255, 215, 0, 0.1);  
+        }  
+          
+        .action-btn.primary {  
+            background: var(--accent);  
+            color: var(--primary);  
+        }  
+          
+        .action-btn.primary:hover {  
+            background: #e6c300;  
+        }  
+          
+        @media (max-width: 768px) {  
+            .question-text {  
+                font-size: 1.3rem;  
+            }  
+              
+            .question-container {  
+                padding: 1.5rem;  
+            }  
+              
+            .action-buttons {  
+                flex-direction: column;  
+                gap: 0.5rem;  
+            }  
+              
+            .action-btn {  
+                width: 100%;  
+            }  
+        }  
+    </style>  
+</head>  
+<body>  
+    <div class="container">  
+        <header>  
+            <button class="back-btn" id="backBtn">  
+                <i class="fas fa-arrow-left"></i>  
+            </button>  
+            <div class="stage-info">  
+                <div class="stage-title" id="stageTitle">المرحلة 1</div>  
+                <div class="progress-container">  
+                    <div class="progress-bar" id="progressBar"></div>  
+                </div>  
+            </div>  
+            <div style="width: 40px;"></div>  
+        </header>  
+          
+        <div class="question-container">  
+            <div class="question-text" id="questionText"></div>  
+            <div class="options-container" id="optionsContainer"></div>  
+            <button class="next-btn hidden" id="nextBtn">السؤال التالي <i class="fas fa-arrow-left"></i></button>  
+        </div>  
+          
+        <div class="result-container" id="resultContainer">  
+            <h2 class="result-title" id="resultTitle">أحسنت!</h2>  
+            <div class="result-score" id="resultScore"></div>  
+            <p class="result-message" id="resultMessage"></p>  
+            <div class="action-buttons">  
+                <button class="action-btn primary" id="restartBtn">  
+                    <i class="fas fa-redo"></i> إعادة اللعب  
+                </button>  
+                <button class="action-btn" id="stagesBtn">  
+                    <i class="fas fa-layer-group"></i> قائمة المراحل  
+                </button>  
+            </div>  
+        </div>  
+    </div>  
+  
+    <script>  
+        // جميع الأسئلة (150 سؤال مقسمة على 15 مرحلة)  
         const allQuestions = {
-            stage1: [
-                {
-                    question: "ماذا لو كان البشر لا يحتاجون للنوم؟",
-                    options: [
-                        "لأصبحت المدن تعمل 24 ساعة",
-                        "لزادت ساعات العمل بشكل كبير",
-                        "لتغيرت تصميم المنازل بدون غرف نوم",
-                        "كل ما سبق"
-                    ],
-                    correct: 3
-                },
-                {
-                    question: "ماذا لو اختفت الإنترنت فجأة؟",
-                    options: [
-                        "لانهارت البورصات العالمية",
-                        "لعاد الناس للتواصل المباشر",
-                        "لتوقفت معظم الخدمات الحديثة",
-                        "جميع ما سبق"
-                    ],
-                    correct: 3
-                },
-                {
-                    question: "ماذا لو اكتشفنا حياة ذكية على المريخ؟",
-                    options: [
-                        "لتغيرت مفاهيمنا عن الحياة في الكون",
-                        "لزادت ميزانيات أبحاث الفضاء",
-                        "لنشأت أزمات دينية وفلسفية",
-                        "كل ما سبق"
-                    ],
-                    correct: 3
-                },
-                {
-                    question: "ماذا لو استطعنا قراءة الأفكار؟",
-                    options: [
-                        "لانتهت الجرائم تقريباً",
-                        "لتغيرت العلاقات الاجتماعية جذرياً",
-                        "لاختفت الخصوصية تماماً",
-                        "جميع ما سبق"
-                    ],
-                    correct: 3
-                },
-                {
-                    question: "ماذا لو اختفت المال من العالم؟",
-                    options: [
-                        "لعاش الناس بنظام المقايضة",
-                        "لتغير مفهوم القيمة تماماً",
-                        "لانهارت الحكومات والبنوك",
-                        "كل ما سبق"
-                    ],
-                    correct: 3
-                },
-                {
-                    question: "ماذا لو عاش البشر 200 سنة؟",
-                    options: [
-                        "لزادت فترة التعليم والعمل",
-                        "لتغيرت هرمات الأعمار في المجتمعات",
-                        "لأصبحت الشيخوخة مختلفة تماماً",
-                        "جميع ما سبق"
-                    ],
-                    correct: 3
-                },
-                {
-                    question: "ماذا لو اختفت الجاذبية الأرضية لمدة يوم؟",
-                    options: [
-                        "لطارت الأجسام غير المثبتة في الهواء",
-                        "لتعطلت أنظمة الطقس تماماً",
-                        "لأصبح التنقل مستحيلاً",
-                        "كل ما سبق"
-                    ],
-                    correct: 3
-                },
-                {
-                    question: "ماذا لو استطعنا السفر عبر الزمن؟",
-                    options: [
-                        "لأصبح التاريخ مادة قابلة للتعديل",
-                        "لنشأت مفارقات زمنية غريبة",
-                        "لأصبحت الجرائم مستحيلة",
-                        "جميع ما سبق"
-                    ],
-                    correct: 3
-                },
-                {
-                    question: "ماذا لو انقرضت فجأة جميع الحشرات؟",
-                    options: [
-                        "لانهارت النظم البيئية",
-                        "لتأثرت الزراعة بشدة",
-                        "لاختفت العديد من النباتات",
-                        "كل ما سبق"
-                    ],
-                    correct: 3
-                },
-                {
-                    question: "ماذا لو كان للحيوانات لغة مفهومة مثل البشر؟",
-                    options: [
-                        "لأصبحت حدائق الحيوان أماكن مختلفة",
-                        "لتغيرت نظرتنا للحقوق الحيوانية",
-                        "لأصبحت الزراعة أكثر تعقيداً",
-                        "جميع ما سبق"
-                    ],
-                    correct: 3
-                }
+    stage1: [
+        {
+            question: "ماذا لو كان البشر لا يحتاجون للنوم؟",
+            options: [
+                "لزادت إنتاجية البشر بنسبة 40%",
+                "لاختفت صناعة المراتب والوسائد",
+                "لأصبح الليل والنهار متشابهين",
+                "لتغيرت مواعيد العمل في كل الدول"
             ],
-            stage2: [
-                {
-                    question: "ماذا لو كانت الأرض مسطحة حقاً؟",
-                    options: [
-                        "لاختفت الجاذبية بالشكل الذي نعرفه",
-                        "لأصبحت الرحلات الجوية مختلفة تماماً",
-                        "لتغيرت أنماط الطقس جذرياً",
-                        "كل ما سبق"
-                    ],
-                    correct: 3
-                },
-                {
-                    question: "ماذا لو لم يكتشف البشر النار؟",
-                    options: [
-                        "لبقي البشر يعيشون على الطعام النيء",
-                        "لتأخر تطور الحضارة آلاف السنين",
-                        "لما تطورت الصناعات المعدنية",
-                        "جميع ما سبق"
-                    ],
-                    correct: 3
-                },
-                {
-                    question: "ماذا لو كان للبشر ذيول؟",
-                    options: [
-                        "لتغير تصميم الملابس والأثاث",
-                        "لأصبحت لغة الجسد أكثر تعقيداً",
-                        "لظهرت رياضات جديدة تعتمد على الذيل",
-                        "كل ما سبق"
-                    ],
-                    correct: 3
-                },
-                {
-                    question: "ماذا لو كانت النباتات تمشي؟",
-                    options: [
-                        "لأصبحت المدن أكثر اخضراراً",
-                        "لتغيرت الزراعة تماماً",
-                        "لظهرت أنظمة جديدة لتربية النباتات",
-                        "جميع ما سبق"
-                    ],
-                    correct: 3
-                },
-                {
-                    question: "ماذا لو كان الماء مشتعلاً؟",
-                    options: [
-                        "لأصبحت الحياة مستحيلة",
-                        "لتغيرت الكيمياء تماماً",
-                        "لاختفت المحيطات والأنهار",
-                        "كل ما سبق"
-                    ],
-                    correct: 3
-                },
-                {
-                    question: "ماذا لو كان الهواء مرئياً بوضوح؟",
-                    options: [
-                        "لأصبحت الرؤية محدودة جداً",
-                        "لرأينا الأعاصير والرياح بوضوح",
-                        "لتغيرت تجربة الطيران تماماً",
-                        "جميع ما سبق"
-                    ],
-                    correct: 3
-                },
-                {
-                    question: "ماذا لو كانت الأرض تدور بسرعة أكبر؟",
-                    options: [
-                        "لأصبحت الأيام أقصر",
-                        "لقلت الجاذبية على سطح الأرض",
-                        "لازدادت قوة الأعاصير والعواصف",
-                        "كل ما سبق"
-                    ],
-                    correct: 3
-                },
-                {
-                    question: "ماذا لو كان للقمر غلاف جوي مثل الأرض؟",
-                    options: [
-                        "لأصبح العيش على القمر ممكناً",
-                        "لظهرت حياة نباتية على القمر",
-                        "لأصبح القمر أكثر لمعاناً في الليل",
-                        "جميع ما سبق"
-                    ],
-                    correct: 3
-                },
-                {
-                    question: "ماذا لو كانت الحيوانات تتكلم جميعها؟",
-                    options: [
-                        "لأصبحت حدائق الحيوان مختلفة تماماً",
-                        "لتغيرت صناعة الغذاء",
-                        "لأصبحت العلاقة بين الإنسان والحيوان أكثر تعقيداً",
-                        "كل ما سبق"
-                    ],
-                    correct: 3
-                },
-                {
-                    question: "ماذا لو كانت الشمس خضراء اللون؟",
-                    options: [
-                        "لأصبحت النباتات بلون مختلف",
-                        "لتغيرت ألوان السماء والغيوم",
-                        "لأثر ذلك على نفسية البشر",
-                        "جميع ما سبق"
-                    ],
-                    correct: 3
-                }
+            correct: 1
+        },
+        {
+            question: "ماذا لو اختفت الإنترنت ليوم واحد؟",
+            options: [
+                "لتعطلت خدمات البنوك العالمية",
+                "لانهارت أسهم شركات التكنولوجيا",
+                "لعاد الناس لقراءة الكتب الورقية",
+                "لتعطلت أنظمة الملاحة الجوية"
             ],
-            // المراحل من 3 إلى 15 بنفس النمط (يمكن استكمالها)
-            stage3: [
-                // 10 أسئلة للمرحلة 3
+            correct: 3
+        },
+        {
+            question: "ماذا لو اكتشفنا حياة ذكية على المريخ؟",
+            options: [
+                "لزادت ميزانيات أبحاث الفضاء",
+                "لتغيرت النظريات العلمية حول الحياة",
+                "لأصبح السفر للمريخ أولوية عالمية",
+                "لنشأت منظمات فضائية دولية جديدة"
             ],
-            stage4: [
-                // 10 أسئلة للمرحلة 4
+            correct: 1
+        },
+        {
+            question: "ماذا لو استطعنا قراءة الأفكار؟",
+            options: [
+                "لانتهت الجرائم الغامضة",
+                "لاختفت العلاقات الزوجية",
+                "لأصبحت الدبلوماسية مستحيلة",
+                "لتغيرت أساليب التعليم"
             ],
-            stage5: [
-                // 10 أسئلة للمرحلة 5
+            correct: 0
+        },
+        {
+            question: "ماذا لو اختفت المال من العالم؟",
+            options: [
+                "لعاش الناس بنظام المقايضة",
+                "لانهارت البورصات العالمية",
+                "لزادت البطالة في القطاع المالي",
+                "لاختفت الجرائم المالية"
             ],
-            stage6: [
-                // 10 أسئلة للمرحلة 6
+            correct: 2
+        },
+        {
+            question: "ماذا لو عاش البشر 200 سنة؟",
+            options: [
+                "لزادت فترة التعليم إلى 40 سنة",
+                "لتأخر سن الزواج إلى 80 سنة",
+                "لأصبح التقاعد في عمر 150",
+                "لتغيرت هرمات الأعمار في المجتمعات"
             ],
-            stage7: [
-                // 10 أسئلة للمرحلة 7
+            correct: 3
+        },
+        {
+            question: "ماذا لو اختفت الجاذبية الأرضية لمدة يوم؟",
+            options: [
+                "لطارت الأجسام غير المثبتة",
+                "لتعطلت أنظمة الطقس تماماً",
+                "لانعدمت القدرة على الحركة",
+                "لارتفعت مياه المحيطات"
             ],
-            stage8: [
-                // 10 أسئلة للمرحلة 8
+            correct: 0
+        },
+        {
+            question: "ماذا لو استطعنا السفر عبر الزمن؟",
+            options: [
+                "لأصبح تعديل التاريخ ممكناً",
+                "لنشأت مفارقات زمنية",
+                "لاختفت الجرائم المستعصية",
+                "لتغيرت مفاهيم العدالة"
             ],
-            stage9: [
-                // 10 أسئلة للمرحلة 9
+            correct: 1
+        },
+        {
+            question: "ماذا لو انقرضت فجأة جميع الحشرات؟",
+            options: [
+                "لانهارت النظم البيئية",
+                "لتحسنت صحة البشر",
+                "لاختفت العديد من النباتات",
+                "لانخفضت أعداد الطيور"
             ],
-            stage10: [
-                // 10 أسئلة للمرحلة 10
+            correct: 2
+        },
+        {
+            question: "ماذا لو كان للحيوانات لغة مفهومة؟",
+            options: [
+                "لأصبحت حدائق الحيوان متاحف",
+                "لتغيرت صناعة الغذاء",
+                "لزادت حقوق الحيوانات",
+                "لأصبحت المحادثات مع الحيوانات ممكنة"
             ],
-            stage11: [
-                // 10 أسئلة للمرحلة 11
-            ],
-            stage12: [
-                // 10 أسئلة للمرحلة 12
-            ],
-            stage13: [
-                // 10 أسئلة للمرحلة 13
-            ],
-            stage14: [
-                // 10 أسئلة للمرحلة 14
-            ],
-            stage15: [
-                // 10 أسئلة للمرحلة 15
-            ]
-        };
-
-        // متغيرات اللعبة
-        let currentStage = 1;
-        let currentQuestion = 0;
-        let score = 0;
-        let selectedOption = null;
-        let questions = [];
-        
-        // عناصر DOM
-        const stageTitle = document.getElementById('stageTitle');
-        const progressBar = document.getElementById('progressBar');
-        const questionText = document.getElementById('questionText');
-        const optionsContainer = document.getElementById('optionsContainer');
-        const nextBtn = document.getElementById('nextBtn');
-        const resultContainer = document.getElementById('resultContainer');
-        const resultTitle = document.getElementById('resultTitle');
-        const resultScore = document.getElementById('resultScore');
-        const resultMessage = document.getElementById('resultMessage');
-        const restartBtn = document.getElementById('restartBtn');
-        const stagesBtn = document.getElementById('stagesBtn');
-        const backBtn = document.getElementById('backBtn');
-        
-        // تهيئة اللعبة
-        function initGame() {
-            const urlParams = new URLSearchParams(window.location.search);
-            currentStage = parseInt(urlParams.get('stage')) || 1;
-            stageTitle.textContent = `المرحلة ${currentStage}`;
-            
-            // تحميل أسئلة المرحلة
-            questions = allQuestions[`stage${currentStage}`] || [];
-            
-            // إعادة تعيين المتغيرات
-            currentQuestion = 0;
-            score = 0;
-            selectedOption = null;
-            
-            // إخفاء نتيجة المرحلة
-            resultContainer.style.display = 'none';
-            
-            // عرض السؤال الأول
-            showQuestion();
+            correct: 3
         }
-        
-        // عرض السؤال الحالي
-        function showQuestion() {
-            if (currentQuestion >= questions.length) {
-                endStage();
-                return;
-            }
-            
-            const question = questions[currentQuestion];
-            questionText.textContent = question.question;
-            
-            optionsContainer.innerHTML = '';
-            question.options.forEach((option, index) => {
-                const optionElement = document.createElement('div');
-                optionElement.className = 'option';
-                optionElement.innerHTML = `
-                    ${option}
-                    <i class="far fa-circle option-icon"></i>
-                `;
-                
-                optionElement.addEventListener('click', () => selectOption(index));
-                optionsContainer.appendChild(optionElement);
-            });
-            
-            // تحديث شريط التقدم
-            updateProgress();
-            
-            // إخفاء زر التالي
-            nextBtn.classList.add('hidden');
+    ],
+    stage2: [
+        {
+            question: "ماذا لو انتصر المسلمون في معركة بلاط الشهداء؟",
+            options: [
+                "لدخل الإسلام أوروبا مبكراً",
+                "لتغيرت اللغة الفرنسية",
+                "لأصبحت باريس مركزاً إسلامياً",
+                "لانتشرت المدارس الفقهية في أوروبا"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو لم يهاجر النبي صلى الله عليه وسلم؟",
+            options: [
+                "لتأخر تأسيس الدولة الإسلامية",
+                "لاختلف نظام التشريع الإسلامي",
+                "لما كانت الهجرة النبوية حدثاً",
+                "لصعب نشر الإسلام خارج مكة"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو انتصر المسلمون في الحروب الصليبية مبكراً؟",
+            options: [
+                "لاختفت الممالك الصليبية",
+                "لما بنيت القلاع الصليبية",
+                "لتغيرت خريطة أوروبا",
+                "لانتهت الحملات الصليبية"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو عاش الخليفة عمر بن الخطاب أكثر؟",
+            options: [
+                "لاتسعت الفتوحات الإسلامية",
+                "لتطور النظام القضائي",
+                "لزادت مساحة الدولة الإسلامية",
+                "لأنشأ ديواناً للصناعة"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو لم يقع الانقسام بعد عثمان؟",
+            options: [
+                "لما ظهرت الفرق الإسلامية",
+                "لاتحدت الصفوف ضد الأعداء",
+                "لتوحدت الخلافة الإسلامية",
+                "لاختفت معارك الجمل وصفين"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو لم يسقط الأندلس؟",
+            options: [
+                "لبقيت إسبانيا إسلامية",
+                "لازدهرت العلوم في أوروبا",
+                "لانتشرت العربية في أمريكا",
+                "لما ظهرت محاكم التفتيش"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو انتصر العباسيون في الزاب؟",
+            options: [
+                "لانهارت الدولة الأموية",
+                "لبقي الأمويون في الحكم",
+                "لما نقلت العاصمة إلى بغداد",
+                "لتغير نظام الحكم"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو لم يفتح المسلمون القسطنطينية؟",
+            options: [
+                "لبقيت الإمبراطورية البيزنطية",
+                "لما تغير اسم المدينة",
+                "لتأخر سقوط الرومانية",
+                "لاختفت الكنائس البيزنطية"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو لم يكتشف المسلمون الورق؟",
+            options: [
+                "لتأخر تدوين العلوم",
+                "لاختلف شكل المصاحف",
+                "لما انتشرت المكتبات",
+                "لبقي الاعتماد على الرقوق"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو استمرت حركة الترجمة؟",
+            options: [
+                "لتطورت العلوم الإسلامية",
+                "لازدهرت العلوم في أوروبا",
+                "لاخترع المسلمون المطبعة",
+                "لترجمت كتب اليونان"
+            ],
+            correct: 0
         }
-        
-        // اختيار الإجابة
-        function selectOption(index) {
-            if (selectedOption !== null) return;
-            
-            selectedOption = index;
-            const correctIndex = questions[currentQuestion].correct;
-            const options = document.querySelectorAll('.option');
-            
-            options.forEach((option, i) => {
-                if (i === correctIndex) {
-                    option.classList.add('correct');
-                    option.querySelector('.option-icon').className = 'fas fa-check option-icon';
-                } else if (i === index && i !== correctIndex) {
-                    option.classList.add('wrong');
-                    option.querySelector('.option-icon').className = 'fas fa-times option-icon';
-                }
-            });
-            
-            // زيادة النقاط إذا كانت الإجابة صحيحة
-            if (index === correctIndex) {
-                score++;
-            }
-            
-            // إظهار زر التالي
-            nextBtn.classList.remove('hidden');
+    ],
+    stage3: [
+        {
+            question: "ماذا لو اكتشفنا علاجاً للشيخوخة؟",
+            options: [
+                "لزاد متوسط العمر إلى 150 سنة",
+                "لتغيرت هرمات المجتمع",
+                "لأصبح التقاعد في عمر 100",
+                "لاختفت أمراض الشيخوخة"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو انتهت جميع الأمراض الوراثية؟",
+            options: [
+                "لزاد متوسط العمر المتوقع",
+                "لاختفت المستشفيات المتخصصة",
+                "لتحسنت جودة الحياة",
+                "لانخفضت ميزانيات الصحة"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو أصبحت الجراحة بدون دم ممكنة؟",
+            options: [
+                "لاختفت بنوك الدم",
+                "لقلت مخاطر العمليات",
+                "لأصبحت العمليات أسرع",
+                "لتغيرت تقنيات الجراحة"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو اكتشفنا علاجاً للسرطان؟",
+            options: [
+                "لانخفضت الوفيات بنسبة 30%",
+                "لتغيرت أولويات البحث العلمي",
+                "لأصبح السرطان مرضاً عادياً",
+                "لاختفت مراكز الأورام"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو تمكنّا من زرع الذاكرة؟",
+            options: [
+                "لأصبح التعلم فورياً",
+                "لاختفت أمراض الزهايمر",
+                "لتغيرت مفاهيم الهوية",
+                "لظهرت جرائم ذاكرة"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو انتهت أمراض القلب؟",
+            options: [
+                "لزاد متوسط العمر 10 سنوات",
+                "لاختفت عمليات القلب المفتوح",
+                "لتحسنت حياة المسنين",
+                "لانخفضت تكاليف الرعاية الصحية"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو أصبح التخدير غير ضروري؟",
+            options: [
+                "لاختفت مخاطر التخدير",
+                "لأصبحت العمليات أرخص",
+                "لتغيرت طرق العلاج",
+                "لزادت جراحات التجميل"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو تمكنّا من تجديد الأعضاء؟",
+            options: [
+                "لاختفت عمليات الزراعة",
+                "لزاد العمر المتوقع",
+                "لتحسنت جودة الحياة",
+                "لتغيرت نظم التأمين الصحي"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو انتهت الأوبئة للأبد؟",
+            options: [
+                "لأصبح السفر أكثر أمناً",
+                "لاختفت الحجر الصحي",
+                "لتحسنت الاقتصادات العالمية",
+                "لانخفضت تكاليف الرعاية"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو تمكنّا من التحكم بالجينات؟",
+            options: [
+                "لأصبحت الأمراض الوراثية اختيارية",
+                "لتغيرت الصفات البشرية",
+                "لظهرت أخلاقيات جديدة",
+                "لاختفت التشوهات الخلقية"
+            ],
+            correct: 1
         }
-        
-        // الانتقال للسؤال التالي
-        function nextQuestion() {
-            currentQuestion++;
-            selectedOption = null;
-            showQuestion();
+    ],
+    stage4: [
+        {
+            question: "ماذا لو فازت مصر بكأس العالم؟",
+            options: [
+                "لأصبحت الرياضة أولوية وطنية",
+                "لتحولت المدن إلى احتفالات",
+                "لزادت شعبية كرة القدم",
+                "لتحسنت صورة مصر العالمية"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو أصبحت الألعاب الأولمبية في السعودية؟",
+            options: [
+                "لتغيرت نظرة العالم للرياضة العربية",
+                "لأصبحت الرياضة جزءاً من رؤية 2030",
+                "لزاد الاستثمار في البنية التحتية",
+                "لنشأت مراكز تدريب عالمية"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو عاد محمد صلاح للدوري المصري؟",
+            options: [
+                "لزادت شعبية الدوري المحلي",
+                "لتحسنت مهارات اللاعبين الشباب",
+                "لأصبح الدوري أكثر تنافسية",
+                "لزادت القيمة التسويقية للدوري"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو فاز العرب بميدالية ذهبية أولمبية؟",
+            options: [
+                "لأصبحت الرياضة أولوية عربية",
+                "لزاد الدعم للرياضيين",
+                "لتغيرت نظرة العالم للرياضة العربية",
+                "لنشأت أكاديميات رياضية جديدة"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو استضافت قطر كأس العالم مرة أخرى؟",
+            options: [
+                "لأصبحت قطر عاصمة رياضية",
+                "لتحسنت البنية التحتية أكثر",
+                "لزادت الخبرة التنظيمية",
+                "لنشأت استادات متطورة جديدة"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو فاز منتخب سعودي بكأس آسيا؟",
+            options: [
+                "لأصبحت كرة القدم الرياضة الأولى",
+                "لزادت شعبية اللعبة",
+                "لتحسنت مكانة السعودية الرياضية",
+                "لنشأت أجيال جديدة من اللاعبين"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو تأهل المغرب لنصف نهائي كأس العالم؟",
+            options: [
+                "لأصبحت أفريقيا قوة كروية",
+                "لزادت ثقة المنتخبات الأفريقية",
+                "لتحسنت صورة الكرة الأفريقية",
+                "لنشأت مدارس كروية جديدة"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو عادت مصر للمبارزة الأولمبية؟",
+            options: [
+                "لأصبحت المبارزة رياضة شعبية",
+                "لزاد الاهتمام بالرياضات الفردية",
+                "لتحسنت نتائج مصر الأولمبية",
+                "لنشأت أندية متخصصة"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو فازت الجزائر بكأس الأمم الأفريقية؟",
+            options: [
+                "لأصبحت الجزائر قوة أفريقية",
+                "لزادت شعبية كرة القدم",
+                "لتحسنت الروح المعنوية الوطنية",
+                "لنشأت مراكز تدريب جديدة"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو تأهل الأردن لكأس العالم؟",
+            options: [
+                "لأصبحت كرة القدم أولوية وطنية",
+                "لزاد الدعم للرياضة",
+                "لتحسنت صورة الأردن الرياضية",
+                "لنشأت قاعدة جماهيرية أكبر"
+            ],
+            correct: 3
         }
-        
-        // تحديث شريط التقدم
-        function updateProgress() {
-            const progress = ((currentQuestion + 1) / questions.length) * 100;
-            progressBar.style.width = `${progress}%`;
+    ],
+    stage5: [
+        {
+            question: "ماذا لو انهارت أسعار النفط؟",
+            options: [
+                "لتأثرت اقتصادات الدول المنتجة",
+                "لانخفضت عائدات النفط",
+                "لتحولت الدول لاقتصادات متنوعة",
+                "لزادت البطالة في القطاع النفطي"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو أصبحت العملات الرقمية رسمية؟",
+            options: [
+                "لاختفت البنوك التقليدية",
+                "لتغيرت أنظمة الدفع",
+                "لأصبحت المعاملات أكثر شفافية",
+                "لزادت الجرائم الإلكترونية"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو انهارت البورصة العالمية؟",
+            options: [
+                "لأصبحت الأزمة الاقتصادية عالمية",
+                "لانهارت الشركات الكبرى",
+                "لزادت البطالة بنسبة كبيرة",
+                "لتحول الاستثمار للذهب والعقارات"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو تخلت الصين عن تصنيع العالم؟",
+            options: [
+                "لارتفعت أسعار السلع عالمياً",
+                "لتحول الإنتاج لدول أخرى",
+                "لأصبحت الهند مصنع العالم",
+                "لزادت البطالة في الصين"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو انهارت العملة الأمريكية؟",
+            options: [
+                "لأصبح الدولار بلا قيمة",
+                "لتغير النظام المالي العالمي",
+                "لزادت أهمية اليورو واليوان",
+                "لانهارت الاقتصاد العالمي"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو أصبحت الطاقة المجانية متاحة؟",
+            options: [
+                "لانخفضت تكاليف الإنتاج",
+                "لاختفت فواتير الكهرباء",
+                "لأصبحت الصناعة أكثر ربحية",
+                "لتحسنت جودة الحياة"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو توقفت العولمة الاقتصادية؟",
+            options: [
+                "لأصبحت الدول أكثر اعتماداً على نفسها",
+                "لارتفعت الحواجز التجارية",
+                "لزادت البطالة في قطاع التصدير",
+                "لتحول الاقتصاد للإنتاج المحلي"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو انهارت شركات التكنولوجيا الكبرى؟",
+            options: [
+                "لأصبحت البيانات الشخصية في خطر",
+                "لتأثرت حياة المليارات من الناس",
+                "لظهرت شركات جديدة لملء الفراغ",
+                "لتحول السوق لشركات صينية"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو أصبح الذهب بلا قيمة؟",
+            options: [
+                "لانهارت أسواق الذهب",
+                "لتغيرت أنظمة الاحتياطي",
+                "لأصبحت المعادن النادرة أكثر قيمة",
+                "لتحول الاستثمار للعملات الرقمية"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو انهارت السياحة العالمية؟",
+            options: [
+                "لتأثرت اقتصادات الدول السياحية",
+                "لأغلقت الفنادق والشركات السياحية",
+                "لزادت البطالة في القطاع السياحي",
+                "لتحولت المدن السياحية لمدن إنتاجية"
+            ],
+            correct: 0
         }
-        
-        // انتهاء المرحلة
-        function endStage() {
-            // حفظ التقدم في localStorage
-            saveProgress();
-            
-            // عرض النتيجة
-            resultScore.textContent = `لقد حصلت على ${score} من ${questions.length}`;
-            
-            // تحديد الرسالة والعنوان حسب الأداء
-            if (score === questions.length) {
-                resultTitle.textContent = "أداء مذهل!";
-                resultMessage.textContent = "لقد أجبت على جميع الأسئلة بشكل صحيح. أنت خبير في سيناريوهات 'ماذا لو'!";
-            } else if (score >= questions.length * 0.7) {
-                resultTitle.textContent = "عمل رائع!";
-                resultMessage.textContent = "أداء ممتاز! لديك معرفة قوية بهذه المرحلة من الأسئلة.";
-            } else if (score >= questions.length * 0.5) {
-                resultTitle.textContent = "ليس سيئاً!";
-                resultMessage.textContent = "يمكنك تحسين أدائك بالمحاولة مرة أخرى. حاول التركيز أكثر في المرات القادمة!";
-            } else {
-                resultTitle.textContent = "حاول مرة أخرى!";
-                resultMessage.textContent = "يبدو أنك بحاجة إلى المزيد من المعرفة. لا تقلق، يمكنك إعادة المحاولة!";
-            }
-            
-            resultContainer.style.display = 'block';
+    ],
+    stage6: [
+        {
+            question: "ماذا لو لم يكتب شكسبير أعماله؟",
+            options: [
+                "لتأخر تطور الأدب الإنجليزي",
+                "لاختفت أشهر المسرحيات العالمية",
+                "لأصبحت الثقافة الإنجليزية مختلفة",
+                "لما ظهرت أعمال مماثلة"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو لم يخترع السينما؟",
+            options: [
+                "لأصبح المسرح هو الفن الرئيسي",
+                "لتأخر تطور الفنون البصرية",
+                "لاختفت هوليوود كمركز سينمائي",
+                "لما ظهرت نجوم السينما"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو لم تنهض النهضة الأوروبية؟",
+            options: [
+                "لتأخر التطور الفني والعلمي",
+                "لبقي أوروبا في العصور المظلمة",
+                "لأصبح العالم العربي مركزاً ثقافياً",
+                "لما ظهرت أعمال عصر النهضة"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو لم يكتب المتنبي شعره؟",
+            options: [
+                "لتأخر تطور الشعر العربي",
+                "لاختفت أشهر القصائد العربية",
+                "لأصبحت الثقافة العربية مختلفة",
+                "لما ظهر شعراء بنفس المستوى"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو لم يظهر موتسارت؟",
+            options: [
+                "لتأخر تطور الموسيقى الكلاسيكية",
+                "لاختفت أشهر السيمفونيات",
+                "لأصبحت الموسيقى الأوروبية مختلفة",
+                "لما ظهر بيتهوفن بنفس العبقرية"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو لم تكن الأهرامات؟",
+            options: [
+                "لتغيرت معالم مصر السياحية",
+                "لاختفت إحدى عجائب الدنيا",
+                "لأصبح التاريخ المصري مختلفاً",
+                "لما عرف العالم حضارة الفراعنة"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو لم يظهر بيكاسو؟",
+            options: [
+                "لتأخر تطور الفن الحديث",
+                "لاختفت المدرسة التكعيبية",
+                "لأصبحت المتاحف العالمية مختلفة",
+                "لما ظهر فنانون طليعيون"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو لم تكتب ألف ليلة وليلة؟",
+            options: [
+                "لتأثر الأدب العالمي",
+                "لاختفت الحكايات الشرقية الشهيرة",
+                "لأصبح التراث العربي ناقصاً",
+                "لما ظهرت حكايات مماثلة"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو لم يخترع آلة الطباعة؟",
+            options: [
+                "لتأخر انتشار المعرفة",
+                "لبقي الكتاب مخطوطات نادرة",
+                "لأصبح التعليم حكراً على النخبة",
+                "لما ظهرت الصحافة الحديثة"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو لم تكن الحضارة الإسلامية؟",
+            options: [
+                "لتأخر تطور العلوم والطب",
+                "لاختفت المراكز العلمية في بغداد",
+                "لأصبحت أوروبا متخلفة علمياً",
+                "لما حفظت كتب اليونان"
+            ],
+            correct: 3
         }
-        
-        // حفظ التقدم
-        function saveProgress() {
-            let progress = JSON.parse(localStorage.getItem('stagesProgress')) || [];
-            
-            if (!progress.includes(currentStage)) {
-                progress.push(currentStage);
-                localStorage.setItem('stagesProgress', JSON.stringify(progress));
-            }
+    ],
+    stage7: [
+        {
+            question: "ماذا لو اختفت جبال الألب؟",
+            options: [
+                "لتغيرت خريطة أوروبا",
+                "لاختفت منتجعات التزلج",
+                "لأصبحت الأنهار الأوروبية أقل",
+                "لتحول المناخ في أوروبا"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو جفت نهر النيل؟",
+            options: [
+                "لتأثرت حياة الملايين",
+                "لأصبحت مصر صحراء قاحلة",
+                "لانهارت الزراعة المصرية",
+                "لتحولت الدلتا لملحقات"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو انصهرت القمم الجليدية؟",
+            options: [
+                "لارتفع مستوى البحار",
+                "لغمرت المياه المدن الساحلية",
+                "لأصبحت الجزر الصغيرة تحت الماء",
+                "لتحول المناخ العالمي"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو اختفت الأمازون؟",
+            options: [
+                "لتغيرت دورة الأكسجين",
+                "لانقرضت آلاف الأنواع",
+                "لأصبح المناخ العالمي مختلفاً",
+                "لتحولت المنطقة لصحراء"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو تحولت الصحراء لغابات؟",
+            options: [
+                "لتحسنت الحياة في أفريقيا",
+                "لزادت مساحات الأراضي الخضراء",
+                "لأصبح المناخ أكثر اعتدالاً",
+                "لاختفت مشكلة التصحر"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو انفجر بركان يلوستون؟",
+            options: [
+                "لأصبحت الكارثة عالمية",
+                "لانخفضت درجات الحرارة عالمياً",
+                "لتأثرت الزراعة لسنوات",
+                "لغُطنت مدن أمريكية"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو اختفى البحر الميت؟",
+            options: [
+                "لأصبحت المنطقة جافة",
+                "لتأثرت السياحة العلاجية",
+                "لاختفت صناعة مستحضرات التجميل",
+                "لتحولت المنطقة لصحراء مالحة"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو جفت بحيرة فيكتوريا؟",
+            options: [
+                "لتأثرت حياة 30 مليون شخص",
+                "لانهار نظام نهر النيل",
+                "لأصبحت الزراعة مستحيلة",
+                "لتحولت المنطقة لقاحلة"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو اختفت جزر المالديف؟",
+            options: [
+                "لتأثرت السياحة العالمية",
+                "لأصبحت مشكلة اللاجئين المناخية",
+                "لاختفت ثقافة الجزيرة",
+                "لتحول المحيط الهندي"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو انخفضت ملوحة البحر الأحمر؟",
+            options: [
+                "لتغيرت الحياة البحرية",
+                "لأصبحت الشعاب المرجانية في خطر",
+                "لاختفت أنواع بحرية فريدة",
+                "لتحولت البيئة البحرية"
+            ],
+            correct: 3
         }
-        
-        // إعادة تشغيل المرحلة
-        function restartStage() {
-            initGame();
+    ],
+    stage8: [
+        {
+            question: "ماذا لو اخترعنا درعاً ضد الرصاص؟",
+            options: [
+                "لأصبح الجنود في مأمن",
+                "لتغيرت استراتيجيات الحروب",
+                "لاختفت الأسلحة النارية",
+                "لتحولت صناعة الأسلحة"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو انتهت الحروب؟",
+            options: [
+                "لأصبحت الميزانيات العسكرية للتنمية",
+                "لتوقفت صناعة الأسلحة",
+                "لاختفت الجيوش النظامية",
+                "لتحول العالم للسلام الدائم"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو اخترعنا سلاحاً غير فتاك؟",
+            options: [
+                "لأصبحت الحروب بدون ضحايا",
+                "لتغيرت أخلاقيات الحروب",
+                "لاختفت المعاناة الإنسانية",
+                "لتحولت استراتيجيات القتال"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو أصبحت الجيوش من الروبوتات؟",
+            options: [
+                "لأصبحت الحروب تدار عن بعد",
+                "لتقلصت الخسائر البشرية",
+                "لاختفت الجيوش البشرية",
+                "لتحولت طبيعة الصراعات"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو انهارت القوى العسكرية الكبرى؟",
+            options: [
+                "لتغير ميزان القوى العالمي",
+                "لأصبحت دول صغيرة قوية",
+                "لاختفت الأحلاف العسكرية",
+                "لتحول النظام العالمي"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو اخترعنا نظام دفاع فضائي؟",
+            options: [
+                "لأصبحت الأرض محمية",
+                "لتغيرت استراتيجيات الدفاع",
+                "لاختفت التهديدات النووية",
+                "لتحول سباق التسلح للفضاء"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو تمكنت إسرائيل من ضرب إيران؟",
+            options: [
+                "لتوسعت الصراعات في المنطقة",
+                "لأصبحت الحرب الإقليمية شاملة",
+                "لاختفت التوازنات الإستراتيجية",
+                "لتحولت الخريطة السياسية"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو انهار الجيش الأمريكي؟",
+            options: [
+                "لتغير النظام العالمي",
+                "لأصبحت القوى الصاعدة مسيطرة",
+                "لاختفت القواعد العسكرية",
+                "لتحولت سياسة أمريكا"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو اخترعنا بديلاً للألغام الأرضية؟",
+            options: [
+                "لأصبحت الحروب أكثر أماناً",
+                "لتقلصت إصابات المدنيين",
+                "لاختفت الألغام التقليدية",
+                "لتحولت استراتيجيات الدفاع"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو أصبحت الحرب السيبرانية هي السائدة؟",
+            options: [
+                "لأصبحت الحروب غير مرئية",
+                "لتأثرت البنى التحتية الحيوية",
+                "لاختفت الحروب التقليدية",
+                "لتحولت طبيعة التهديدات"
+            ],
+            correct: 3
         }
-        
-        // العودة إلى قائمة المراحل
-        function goToStages() {
-            window.location.href = 'stages.html';
+    ],
+    stage9: [
+        {
+            question: "ماذا لو اختفى الخوف من حياتنا؟",
+            options: [
+                "لأصبح البشر أكثر جرأة",
+                "لتغيرت ردود أفعالنا",
+                "لاختفت حواجز نفسية",
+                "لتحولت العلاقات الاجتماعية"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو عرفنا سر السعادة؟",
+            options: [
+                "لأصبحت المجتمعات أكثر استقراراً",
+                "لتقلصت الأمراض النفسية",
+                "لاختفت حالات الاكتئاب",
+                "لتحولت أولويات البشر"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو انتهت المشاعر السلبية؟",
+            options: [
+                "لأصبح البشر أكثر إيجابية",
+                "لتغيرت طبيعة العلاقات",
+                "لاختفت الصراعات النفسية",
+                "لتحولت شخصيات البشر"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو تمكنّا من قراءة العقول؟",
+            options: [
+                "لأصبحت الخصوصية مستحيلة",
+                "لتغيرت طبيعة الثقة",
+                "لاختفت الأكاذيب",
+                "لتحولت العلاقات الإنسانية"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو فقدنا الذاكرة الجماعية؟",
+            options: [
+                "لأصبحت الهوية غير موجودة",
+                "لتغيرت الثقافات",
+                "لاختفت الصراعات التاريخية",
+                "لتحولت المجتمعات"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو انتهت الوحدة النفسية؟",
+            options: [
+                "لأصبح البشر أكثر ارتباطاً",
+                "لتقلصت مشاكل الصحة النفسية",
+                "لاختفت حالات الانتحار",
+                "لتحولت المجتمعات"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو تمكنّا من التحكم بالأحلام؟",
+            options: [
+                "لأصبح النوم تجربة إيجابية",
+                "لتغيرت طبيعة اللاوعي",
+                "لاختفت الكوابيس",
+                "لتحولت علاجات الصحة النفسية"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو أصبحت العقول متصلة؟",
+            options: [
+                "لأصبح التواصل فورياً",
+                "لتغيرت مفاهيم الفردية",
+                "لاختفت حواجز اللغة",
+                "لتحولت طبيعة الوعي"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو فقدنا الإحساس بالألم؟",
+            options: [
+                "لأصبحت الأمراض خطيرة دون إنذار",
+                "لتغيرت استجابتنا للخطر",
+                "لاختفت معاناة المرضى",
+                "لتحولت طبيعة الجراحات"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو انتهت العقد النفسية؟",
+            options: [
+                "لأصبح البشر أكثر توازناً",
+                "لتغيرت العلاقات الأسرية",
+                "لاختفت الصراعات الداخلية",
+                "لتحولت الشخصيات الإنسانية"
+            ],
+            correct: 3
         }
-        
-        // الأحداث
-        nextBtn.addEventListener('click', nextQuestion);
-        restartBtn.addEventListener('click', restartStage);
-        stagesBtn.addEventListener('click', goToStages);
-        backBtn.addEventListener('click', goToStages);
-        
-        // بدء اللعبة عند تحميل الصفحة
-        window.addEventListener('load', initGame);
-    </script>
-</body>
+    ],
+    stage10: [
+        {
+            question: "ماذا لو اختفت النفايات البلاستيكية؟",
+            options: [
+                "لأصبحت المحيطات أنظف",
+                "لتغيرت حياة الكائنات البحرية",
+                "لاختفت مشكلة التلوث البلاستيكي",
+                "لتحولت صناعة التغليف"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو عادت طبقة الأوزون كاملة؟",
+            options: [
+                "لأصبحت الأشعة فوق البنفسجية أقل",
+                "لتقلصت سرطانات الجلد",
+                "لاختفت مشكلة الثقب",
+                "لتحولت سياسات البيئة"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو انتهى التصحر؟",
+            options: [
+                "لأصبحت الأراضي الزراعية أكثر",
+                "لتغيرت حياة الملايين",
+                "لاختفت المجاعات في أفريقيا",
+                "لتحولت المناطق القاحلة"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو عادت الحيوانات المنقرضة؟",
+            options: [
+                "لأصبحت المحميات أكثر تنوعاً",
+                "لتغيرت النظم البيئية",
+                "لاختفت فجوات في السلسلة الغذائية",
+                "لتحولت جهود الحفظ"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو اختفت انبعاثات الكربون؟",
+            options: [
+                "لأصبحت الأرض أكثر برودة",
+                "لتغيرت ظاهرة الاحتباس الحراري",
+                "لاختفت مشكلة التغير المناخي",
+                "لتحولت سياسات الطاقة"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو أصبحت المياه النظيفة متاحة للجميع؟",
+            options: [
+                "لأصبحت الصحة العالمية أفضل",
+                "لتقلصت أمراض المياه الملوثة",
+                "لاختفت معاناة مليارات البشر",
+                "لتحولت حياة المجتمعات الفقيرة"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو انتهت إزالة الغابات؟",
+            options: [
+                "لأصبحت الرئة الخضراء تعمل بكفاءة",
+                "لتغيرت دورة الأكسجين",
+                "لاختفت مواطن آلاف الأنواع",
+                "لتحولت سياسات الزراعة"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو اختفت الملوثات الصناعية؟",
+            options: [
+                "لأصبح الهواء أنقى",
+                "لتغيرت صحة سكان المدن",
+                "لاختفت الأمطار الحمضية",
+                "لتحولت معايير الصناعة"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو انتهت الصيد الجائر؟",
+            options: [
+                "لأصبحت المحيطات أكثر تنوعاً",
+                "لتغيرت الحياة البحرية",
+                "لاختفت أنواع مهددة بالانقراض",
+                "لتحولت اقتصاديات الصيد"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو أصبحت الطاقة المتجددة 100%؟",
+            options: [
+                "لأصبحت الأرض أنظف",
+                "لتغيرت سياسات الطاقة",
+                "لاختفت الانبعاثات الضارة",
+                "لتحولت الصناعات الثقيلة"
+            ],
+            correct: 2
+        }
+    ],
+    stage11: [
+        {
+            question: "ماذا لو انهارت الأمم المتحدة؟",
+            options: [
+                "لأصبح العالم بدون منظمة دولية",
+                "لتغيرت حل النزاعات",
+                "لاختفت عمليات السلام",
+                "لتحولت العلاقات الدولية"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو توحد العالم تحت حكومة واحدة؟",
+            options: [
+                "لأصبحت الحدود غير موجودة",
+                "لتغيرت الهويات الوطنية",
+                "لاختفت الحروب بين الدول",
+                "لتحولت السيادة الوطنية"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو أصبحت الصين القوة العظمى الوحيدة؟",
+            options: [
+                "لأصبح النظام العالمي أحادي القطب",
+                "لتغيرت القيم العالمية",
+                "لاختفت الديمقراطيات الغربية",
+                "لتحول الاقتصاد العالمي"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو انهار الاتحاد الأوروبي؟",
+            options: [
+                "لأصبحت أوروبا مجزأة",
+                "لتغيرت العملة في أوروبا",
+                "لاختفت حرية التنقل",
+                "لتحولت السياسات الأوروبية"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو أصبحت إفريقيا قارة موحدة؟",
+            options: [
+                "لأصبحت قوة اقتصادية كبرى",
+                "لتغيرت خريطة القوى العالمية",
+                "لاختفت الصراعات الداخلية",
+                "لتحولت مكانة إفريقيا"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو انتهت الأنظمة الملكية؟",
+            options: [
+                "لأصبحت جميع الدول جمهوريات",
+                "لتغيرت نظم الحكم",
+                "لاختفت العائلات المالكة",
+                "لتحولت التاريخ السياسي"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو أصبحت الديمقراطية عالمية؟",
+            options: [
+                "لأصبحت الشعوب تختار حكامها",
+                "لتغيرت نظم الحكم الاستبدادية",
+                "لاختفت الديكتاتوريات",
+                "لتحولت السياسة العالمية"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو انهارت الولايات المتحدة؟",
+            options: [
+                "لأصبح العالم متعدد الأقطاب",
+                "لتغير النظام المالي العالمي",
+                "لاختفت الهيمنة الأمريكية",
+                "لتحولت القوى العالمية"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو توحدت الدول العربية؟",
+            options: [
+                "لأصبحت قوة عالمية كبرى",
+                "لتغيرت خريطة الشرق الأوسط",
+                "لاختفت الصراعات العربية",
+                "لتحولت مكانة العرب"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو أصبحت الهند القوة الأولى؟",
+            options: [
+                "لأصبحت الثقافة الهندية مهيمنة",
+                "لتغيرت القيم الآسيوية",
+                "لاختفت الهيمنة الغربية",
+                "لتحول الاقتصاد العالمي"
+            ],
+            correct: 3
+        }
+    ],
+    stage12: [
+        {
+            question: "ماذا لو لم يخترع التلفزيون؟",
+            options: [
+                "لأصبح الراديو وسيلة الإعلام الرئيسية",
+                "لتأخر تطور الإعلان",
+                "لاختفت الثقافة البصرية",
+                "لتحولت أوقات الفراغ"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو لم تكن السينما المصرية؟",
+            options: [
+                "لأصبحت الثقافة العربية مختلفة",
+                "لتأخر تطور الفن العربي",
+                "لاختفت أيقونات فنية عربية",
+                "لتحولت صناعة الفن"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو لم يظهر بيكاسو؟",
+            options: [
+                "لأصبح الفن الحديث مختلفاً",
+                "لتأخرت المدرسة التكعيبية",
+                "لاختفت لوحات عالمية شهيرة",
+                "لتحولت المتاحف العالمية"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو لم توجد موسيقى؟",
+            options: [
+                "لأصبح العالم بلا إيقاع",
+                "لتأثرت المشاعر الإنسانية",
+                "لاختفت صناعة الترفيه",
+                "لتحولت الثقافات العالمية"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو لم يكتب نجيب محفوظ؟",
+            options: [
+                "لأصبح الأدب العربي ناقصاً",
+                "لتأخرت الرواية العربية",
+                "لاختفت جائزة نوبل العربية الوحيدة",
+                "لتحولت المشهد الثقافي المصري"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو لم تكن الأوبرا؟",
+            options: [
+                "لأصبح المسرح هو الفن الرئيسي",
+                "لتأثرت الموسيقى الكلاسيكية",
+                "لاختفت عروض الغناء الكبير",
+                "لتحولت الثقافة الأرستقراطية"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو لم يخترع الكاميرا؟",
+            options: [
+                "لأصبحت الذكريات شفهية",
+                "لتأخر التصوير الفوتوغرافي",
+                "لاختفت الصور الشخصية",
+                "لتحول الفن التشكيلي"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو لم تكن مسلسلات رمضان؟",
+            options: [
+                "لأصبح شهر رمضان مختلفاً",
+                "لتأثرت صناعة الدراما العربية",
+                "لاختفت عادة اجتماعية عربية",
+                "لتحولت عادات المشاهدة"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو لم يظهر الفنان وديع الصافي؟",
+            options: [
+                "لأصبحت الأغنية اللبنانية مختلفة",
+                "لتأخر تطور الطرب الأصيل",
+                "لاختفت مدرسة غنائية",
+                "لتحولت الموسيقى العربية"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو لم تكن الحرف العربية؟",
+            options: [
+                "لأصبح الخط العربي غير موجود",
+                "لتأثرت الفنون الإسلامية",
+                "لاختفت زخرفة المساجد",
+                "لتحولت الثقافة البصرية العربية"
+            ],
+            correct: 3
+        }
+    ],
+    stage13: [
+        {
+            question: "ماذا لو اختفت الفروق الطبقية؟",
+            options: [
+                "لأصبح المجتمع أكثر عدالة",
+                "لتغيرت العلاقات الاجتماعية",
+                "لاختفت الامتيازات الطبقية",
+                "لتحولت البنى الاجتماعية"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو أصبح التعليم مجانياً للجميع؟",
+            options: [
+                "لأصبحت المجتمعات أكثر وعياً",
+                "لتغيرت فرص العمل",
+                "لاختفت الأمية",
+                "لتحولت الاقتصادات"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو انتهت البطالة؟",
+            options: [
+                "لأصبحت المجتمعات أكثر استقراراً",
+                "لتغيرت الأحوال المعيشية",
+                "لاختفت الجرائم الاقتصادية",
+                "لتحولت أنظمة الضمان"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو اختفت الجريمة؟",
+            options: [
+                "لأصبحت المدن أكثر أماناً",
+                "لتغيرت أنظمة العدالة",
+                "لاختفت السجون",
+                "لتحولت حياة الناس"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو أصبحت المساواة المطلقة ممكنة؟",
+            options: [
+                "لأصبح المجتمع أكثر تجانساً",
+                "لتغيرت مفاهيم التميز",
+                "لاختفت المنافسة غير العادلة",
+                "لتحولت القيم المجتمعية"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو انتهت الهجرة غير الشرعية؟",
+            options: [
+                "لأصبحت الحدود أكثر أماناً",
+                "لتغيرت سياسات اللجوء",
+                "لاختفت معاناة المهاجرين",
+                "لتحولت العلاقات الدولية"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو أصبحت الرعاية الصحية للجميع؟",
+            options: [
+                "لأصبحت المجتمعات أكثر صحة",
+                "لتغيرت متوسطات الأعمار",
+                "لاختفت الأمراض المهملة",
+                "لتحولت أنظمة الصحة"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو انتهت العنصرية؟",
+            options: [
+                "لأصبحت المجتمعات أكثر انسجاماً",
+                "لتغيرت العلاقات الإنسانية",
+                "لاختفت الصراعات العرقية",
+                "لتحولت السياسات الاجتماعية"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو أصبحت المساواة الجندرية حقيقة؟",
+            options: [
+                "لأصبحت الفرص متساوية للجميع",
+                "لتغيرت الأدوار الاجتماعية",
+                "لاختفت التفرقة في الأجور",
+                "لتحولت البنى الأسرية"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو انتهت الأمية؟",
+            options: [
+                "لأصبحت المجتمعات أكثر إنتاجية",
+                "لتغيرت سوق العمل",
+                "لاختفت مشاكل القراءة والكتابة",
+                "لتحولت أنظمة التعليم"
+            ],
+            correct: 2
+        }
+    ],
+    stage14: [
+        {
+            question: "ماذا لو أصبحت السيارات تطير؟",
+            options: [
+                "لأصبحت الطرق غير ضرورية",
+                "لتغيرت أنظمة النقل",
+                "لاختفت الازدحامات المرورية",
+                "لتحولت المدن"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو استعمرنا المريخ؟",
+            options: [
+                "لأصبحت البشرية متعددة الكواكب",
+                "لتغيرت مستقبل الجنس البشري",
+                "لاختفت مشكلة الاكتظاظ السكاني",
+                "لتحولت أبحاث الفضاء"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو اخترعنا آلة للتنبؤ بالمستقبل؟",
+            options: [
+                "لأصبحت القرارات أكثر دقة",
+                "لتغيرت مفاهيم الاختيار",
+                "لاختفت المفاجآت",
+                "لتحولت حياتنا اليومية"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو أصبحت الروبوتات تفكر مثل البشر؟",
+            options: [
+                "لأصبحت الآلات تتنافس مع البشر",
+                "لتغيرت سوق العمل",
+                "لاختفت بعض المهن",
+                "لتحولت العلاقة بين الإنسان والآلة"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو تمكنّا من السفر للنجوم؟",
+            options: [
+                "لأصبح الكون في متناولنا",
+                "لتغيرت مفاهيم المسافات",
+                "لاختفت حدود الاستكشاف",
+                "لتحولت رحلات الفضاء"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو أصبحت الطاقة النووية آمنة تماماً؟",
+            options: [
+                "لأصبحت الطاقة نظيفة وفيرة",
+                "لتغيرت سياسات الطاقة",
+                "لاختفت المخاوف من الإشعاع",
+                "لتحولت الصناعات الثقيلة"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو اخترعنا غذاءً يكفي العالم؟",
+            options: [
+                "لأصبحت المجاعات من الماضي",
+                "لتغيرت الزراعة",
+                "لاختفت مشكلة الجوع",
+                "لتحولت الاقتصادات الزراعية"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو تمكنّا من إبطاء الشيخوخة؟",
+            options: [
+                "لأصبح متوسط العمر 150 سنة",
+                "لتغيرت هرمات المجتمع",
+                "لاختفت أمراض الشيخوخة",
+                "لتحولت أنظمة التقاعد"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو أصبحت المدن تحت الماء؟",
+            options: [
+                "لأصبحت البحار مأهولة",
+                "لتغيرت مفاهيم العمارة",
+                "لاختفت مشكلة ارتفاع البحار",
+                "لتحولت حياة البشر"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو اخترعنا حاسوباً خارقاً؟",
+            options: [
+                "لأصبحت المشاكل المستعصية قابلة للحل",
+                "لتغيرت الأبحاث العلمية",
+                "لاختفت حدود الحوسبة",
+                "لتحولت التكنولوجيا الحديثة"
+            ],
+            correct: 3
+        }
+    ],
+    stage15: [
+        {
+            question: "ماذا لو كان بإمكاننا قراءة الأفكار؟",
+            options: [
+                "لأصبحت الخصوصية مستحيلة",
+                "لتغيرت العلاقات الإنسانية",
+                "لاختفت الأسرار",
+                "لتحولت طبيعة الثقة"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو كانت هناك حياة بعد الموت؟",
+            options: [
+                "لأصبح الموت مجرد انتقال",
+                "لتغيرت نظرتنا للحياة",
+                "لاختفت مخاوف الموت",
+                "لتحولت السلوكيات الإنسانية"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو تمكنّا من السفر عبر الأبعاد؟",
+            options: [
+                "لأصبحت الأكوان المتوازية قابلة للزيارة",
+                "لتغيرت مفاهيم الفيزياء",
+                "لاختفت حدود المكان والزمان",
+                "لتحولت رحلات الاستكشاف"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو كانت الكائنات الأسطورية حقيقية؟",
+            options: [
+                "لأصبحت الأساطير واقعاً",
+                "لتغيرت العلوم البيولوجية",
+                "لاختفت الحدود بين الخيال والواقع",
+                "لتحولت السياحة العالمية"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو تمكنّا من فهم لغة الحيوانات؟",
+            options: [
+                "لأصبح التواصل بين الأنواع ممكناً",
+                "لتغيرت علاقتنا بالطبيعة",
+                "لاختفت سوء الفهم بين البشر والحيوانات",
+                "لتحولت أبحاث الحيوانات"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو كانت الأحلام حقيقة؟",
+            options: [
+                "لأصبحت الأحلام عالماً موازياً",
+                "لتغيرت نظرتنا للوعي",
+                "لاختفت الحدود بين النوم واليقظة",
+                "لتحولت حياتنا اليومية"
+            ],
+            correct: 3
+        },
+        {
+            question: "ماذا لو تمكنّا من رؤية المستقبل؟",
+            options: [
+                "لأصبحت القرارات مثالية",
+                "لتغيرت مفاهيم القدر",
+                "لاختفت المفاجآت",
+                "لتحولت حياتنا"
+            ],
+            correct: 0
+        },
+        {
+            question: "ماذا لو كانت هناك كائنات فضائية بيننا؟",
+            options: [
+                "لأصبحت البشرية ليست الوحيدة",
+                "لتغيرت نظرتنا لأنفسنا",
+                "لاختفت فكرة التفرد البشري",
+                "لتحولت العلوم البيولوجية"
+            ],
+            correct: 2
+        },
+        {
+            question: "ماذا لو تمكنّا من التحكم في الأحلام؟",
+            options: [
+                "لأصبح النوم مغامرة إبداعية",
+                "لتغيرت طبيعة اللاوعي",
+                "لاختفت الكوابيس",
+                "لتحولت علاجات الصحة النفسية"
+            ],
+            correct: 1
+        },
+        {
+            question: "ماذا لو كانت الأرواح حقيقية؟",
+            options: [
+                "لأصبح الموت بداية جديدة",
+                "لتغيرت النظرة الدينية",
+                "لاختفت مخاوف الموت",
+                "لتحولت الثقافات العالمية"
+            ],
+            correct: 3
+        }
+    ]
+};
+  
+        // متغيرات اللعبة  
+        let currentStage = 1;  
+        let currentQuestion = 0;  
+        let score = 0;  
+        let selectedOption = null;  
+        let questions = [];  
+          
+        // عناصر DOM  
+        const stageTitle = document.getElementById('stageTitle');  
+        const progressBar = document.getElementById('progressBar');  
+        const questionText = document.getElementById('questionText');  
+        const optionsContainer = document.getElementById('optionsContainer');  
+        const nextBtn = document.getElementById('nextBtn');  
+        const resultContainer = document.getElementById('resultContainer');  
+        const resultTitle = document.getElementById('resultTitle');  
+        const resultScore = document.getElementById('resultScore');  
+        const resultMessage = document.getElementById('resultMessage');  
+        const restartBtn = document.getElementById('restartBtn');  
+        const stagesBtn = document.getElementById('stagesBtn');  
+        const backBtn = document.getElementById('backBtn');  
+          
+        // تهيئة اللعبة  
+        function initGame() {  
+            const urlParams = new URLSearchParams(window.location.search);  
+            currentStage = parseInt(urlParams.get('stage')) || 1;  
+            stageTitle.textContent = `المرحلة ${currentStage}`;  
+              
+            // تحميل أسئلة المرحلة  
+            questions = allQuestions[`stage${currentStage}`] || [];  
+              
+            // إعادة تعيين المتغيرات  
+            currentQuestion = 0;  
+            score = 0;  
+            selectedOption = null;  
+              
+            // إخفاء نتيجة المرحلة  
+            resultContainer.style.display = 'none';  
+              
+            // عرض السؤال الأول  
+            showQuestion();  
+        }  
+          
+        // عرض السؤال الحالي  
+        function showQuestion() {  
+            if (currentQuestion >= questions.length) {  
+                endStage();  
+                return;  
+            }  
+              
+            const question = questions[currentQuestion];  
+            questionText.textContent = question.question;  
+              
+            optionsContainer.innerHTML = '';  
+            question.options.forEach((option, index) => {  
+                const optionElement = document.createElement('div');  
+                optionElement.className = 'option';  
+                optionElement.innerHTML = `  
+                    ${option}  
+                    <i class="far fa-circle option-icon"></i>  
+                `;  
+                  
+                optionElement.addEventListener('click', () => selectOption(index));  
+                optionsContainer.appendChild(optionElement);  
+            });  
+              
+            // تحديث شريط التقدم  
+            updateProgress();  
+              
+            // إخفاء زر التالي  
+            nextBtn.classList.add('hidden');  
+        }  
+          
+        // اختيار الإجابة  
+        function selectOption(index) {  
+            if (selectedOption !== null) return;  
+              
+            selectedOption = index;  
+            const correctIndex = questions[currentQuestion].correct;  
+            const options = document.querySelectorAll('.option');  
+              
+            options.forEach((option, i) => {  
+                if (i === correctIndex) {  
+                    option.classList.add('correct');  
+                    option.querySelector('.option-icon').className = 'fas fa-check option-icon';  
+                } else if (i === index && i !== correctIndex) {  
+                    option.classList.add('wrong');  
+                    option.querySelector('.option-icon').className = 'fas fa-times option-icon';  
+                }  
+            });  
+              
+            // زيادة النقاط إذا كانت الإجابة صحيحة  
+            if (index === correctIndex) {  
+                score++;  
+            }  
+              
+            // إظهار زر التالي  
+            nextBtn.classList.remove('hidden');  
+        }  
+          
+        // الانتقال للسؤال التالي  
+        function nextQuestion() {  
+            currentQuestion++;  
+            selectedOption = null;  
+            showQuestion();  
+        }  
+          
+        // تحديث شريط التقدم  
+        function updateProgress() {  
+            const progress = ((currentQuestion + 1) / questions.length) * 100;  
+            progressBar.style.width = `${progress}%`;  
+        }  
+          
+        // انتهاء المرحلة  
+        function endStage() {  
+            // حفظ التقدم في localStorage  
+            saveProgress();  
+              
+            // عرض النتيجة  
+            resultScore.textContent = `لقد حصلت على ${score} من ${questions.length}`;  
+              
+            // تحديد الرسالة والعنوان حسب الأداء  
+            if (score === questions.length) {  
+                resultTitle.textContent = "أداء مذهل!";  
+                resultMessage.textContent = "لقد أجبت على جميع الأسئلة بشكل صحيح. أنت خبير في سيناريوهات 'ماذا لو'!";  
+            } else if (score >= questions.length * 0.7) {  
+                resultTitle.textContent = "عمل رائع!";  
+                resultMessage.textContent = "أداء ممتاز! لديك معرفة قوية بهذه المرحلة من الأسئلة.";  
+            } else if (score >= questions.length * 0.5) {  
+                resultTitle.textContent = "ليس سيئاً!";  
+                resultMessage.textContent = "يمكنك تحسين أدائك بالمحاولة مرة أخرى. حاول التركيز أكثر في المرات القادمة!";  
+            } else {  
+                resultTitle.textContent = "حاول مرة أخرى!";  
+                resultMessage.textContent = "يبدو أنك بحاجة إلى المزيد من المعرفة. لا تقلق، يمكنك إعادة المحاولة!";  
+            }  
+              
+            resultContainer.style.display = 'block';  
+        }  
+          
+        // حفظ التقدم  
+        function saveProgress() {  
+            let progress = JSON.parse(localStorage.getItem('stagesProgress')) || [];  
+              
+            if (!progress.includes(currentStage)) {  
+                progress.push(currentStage);  
+                localStorage.setItem('stagesProgress', JSON.stringify(progress));  
+            }  
+        }  
+          
+        // إعادة تشغيل المرحلة  
+        function restartStage() {  
+            initGame();  
+        }  
+          
+        // العودة إلى قائمة المراحل  
+        function goToStages() {  
+            window.location.href = 'stages.html';  
+        }  
+          
+        // الأحداث  
+        nextBtn.addEventListener('click', nextQuestion);  
+        restartBtn.addEventListener('click', restartStage);  
+        stagesBtn.addEventListener('click', goToStages);  
+        backBtn.addEventListener('click', goToStages);  
+          
+        // بدء اللعبة عند تحميل الصفحة  
+        window.addEventListener('load', initGame);  
+    </script>  
+</body>  
 </html>
