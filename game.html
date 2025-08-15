@@ -112,6 +112,24 @@
             grid-template-columns: 1fr;
             gap: 1rem;
         }
+
+        /* منع النسخ */
+* {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* منع التكبير */
+html {
+    touch-action: pan-x pan-y;
+}
+
+/* منع اللون الأزرق عند الضغط */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
         
         .option {
             background: rgba(255, 255, 255, 0.05);
