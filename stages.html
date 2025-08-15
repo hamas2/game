@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مراحل اللعبة - ماذا لو؟</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #000000;
+            --secondary: #1a1a1a;
+            --accent: #ffd700;
+            --text: #ffffff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+        
+        body {
+            background-color: var(--primary);
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1" fill="%23ffd700" opacity="0.5"/></svg>');
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .back-btn {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--accent);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 215, 0, 0.1);
+            transform: translateX(-5px);
+        }
+        
+        .page-title {
+            font-size: 2rem;
+            color: var(--accent);
+            text-align: center;
+            flex-grow: 1;
+        }
+        
+        .stages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 2rem;
+        }
+        
+        .stage-card {
+            background: var(--secondary);
+            border-radius: 10px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        
+        .stage-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
+            border-color: var(--accent);
+        }
+        
+        .stage-card.completed {
+            background: rgba(26, 26, 26, 0.7);
+            border: 1px solid var(--accent);
+        }
+        
+        .stage-card.completed::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 40px 40px 0;
+            border-color: transparent var(--accent) transparent transparent;
+        }
+        
+        .stage-card.completed::before {
+            content: "\f00c";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            color: var(--primary);
+            z-index: 1;
+            font-size: 0.8rem;
+        }
+        
+        .stage-number {
+            font-size: 1.2rem;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stage-name {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stage-progress {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        @media (max-width: 768px) {
+            .stages-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 15px;
+            }
+            
+            .stage-card {
+                padding: 1rem 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <button class="back-btn" id="backBtn">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1 class="page-title">
+                <i class="fas fa-layer-group"></i> مراحل اللعبة
+            </h1>
+            <div style="width: 40px;"></div> <!-- عنصر فارغ للمحاذاة -->
+        </header>
+        
+        <div class="stages-grid" id="stagesGrid">
+            <!-- سيتم ملؤها بواسطة الجافاسكربت -->
+        </div>
+    </div>
+
+    <script>
+        // بيانات المراحل
+        const stages = [
+            { id: 1, name: "المرحلة الأولى", completed: false },
+            { id: 2, name: "المرحلة الثانية", completed: false },
+            { id: 3, name: "name: "المرحلة الثالثة", completed: false },
+            { id: 4, name: "المرحلة الرابعة", completed: false },
+            { id: 5, name: "المرحلة الخامسة", completed: false },
+            { id: 6, name: "المرحلة السادسة", completed: false },
+            { id: 7, name: "المرحلة السابعة", completed: false },
+            { id: 8, name: "المرحلة الثامنة", completed: false },
+            { id: 9, name: "المرحلة التاسعة", completed: false },
+            { id: 10, name: "المرحلة العاشرة", completed: false },
+            { id: 11, name: "المرحلة الحادية عشر", completed: false },
+            { id: 12, name: "المرحلة الثانية عشر", completed: false },
+            { id: 13, name: "المرحلة الثالثة عشر", completed: false },
+            { id: 14, name: "المرحلة الرابعة عشر", completed: false },
+            { id: 15, name: "المرحلة الخامسة عشر", completed: false }
+        ];
+
+        // تحميل التقدم المحفوظ
+        function loadProgress() {
+            const savedProgress = localStorage.getItem('stagesProgress');
+            if (savedProgress) {
+                const progress = JSON.parse(savedProgress);
+                stages.forEach(stage => {
+                    if (progress.includes(stage.id)) {
+                        stage.completed = true;
+                    }
+                });
+            }
+        }
+
+        // عرض المراحل
+        function renderStages() {
+            const stagesGrid = document.getElementById('stagesGrid');
+            stagesGrid.innerHTML = '';
+            
+            stages.forEach(stage => {
+                const stageCard = document.createElement('div');
+                stageCard.className = `stage-card ${stage.completed ? 'completed' : ''}`;
+                stageCard.innerHTML = `
+                    <div class="stage-number">المرحلة ${stage.id}</div>
+                    <div class="stage-name">${stage.name}</div>
+                    <div class="stage-progress">${stage.completed ? 'مكتملة' : 'غير مكتملة'}</div>
+                `;
+                
+                stageCard.addEventListener('click', () => {
+                    window.location.href = `game.html?stage=${stage.id}`;
+                });
+                
+                stagesGrid.appendChild(stageCard);
+            });
+        }
+
+        // العودة للصفحة الرئيسية
+        document.getElementById('backBtn').addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+
+        // تهيئة الصفحة
+        loadProgress();
+        renderStages();
+    </script>
+</body>
+</html>
