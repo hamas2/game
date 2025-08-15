@@ -96,6 +96,24 @@
             box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
             border-color: var(--accent);
         }
+
+        /* منع النسخ */
+* {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* منع التكبير */
+html {
+    touch-action: pan-x pan-y;
+}
+
+/* منع اللون الأزرق عند الضغط */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
         
         .stage-card.completed {
             background: rgba(26, 26, 26, 0.7);
